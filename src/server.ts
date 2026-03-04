@@ -10,7 +10,7 @@ server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(express.static('public'));
 
-server.get('/ping', (req: Request, res: Response): void => {
+server.get('/api/ping', (req: Request, res: Response): void => {
     res.json({ pong: true });
 });
 
