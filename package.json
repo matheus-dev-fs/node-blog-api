@@ -1,0 +1,43 @@
+{
+    "name": "blog-api",
+    "version": "1.0.0",
+    "description": "",
+    "homepage": "https://github.com/matheus-dev-fs/node-blog-api#readme",
+    "bugs": {
+        "url": "https://github.com/matheus-dev-fs/node-blog-api/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/matheus-dev-fs/node-blog-api.git"
+    },
+    "license": "ISC",
+    "author": "",
+    "type": "module",
+    "main": "./src/server.ts",
+    "scripts": {
+        "dev": "tsx watch src/server.ts",
+        "build": "tsc"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.6",
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/multer": "^2.0.0",
+        "@types/node": "^25.3.3",
+        "@types/slug": "^5.0.9",
+        "prisma": "^7.4.2",
+        "tsx": "^4.21.0",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "bcryptjs": "^3.0.3",
+        "body-parser": "^2.2.2",
+        "cors": "^2.8.6",
+        "express": "^5.2.1",
+        "jsonwebtoken": "^9.0.3",
+        "multer": "^2.1.1",
+        "slug": "^11.0.1",
+        "uuid": "^13.0.0",
+        "zod": "^4.3.6"
+    }
+}
