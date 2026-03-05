@@ -6,8 +6,6 @@ import type { User } from "../generated/prisma/client";
 
 export const createUser = async ({ name, email, password }: CreateUserProps): Promise<ServiceResult<SafeUser>> => {
     try {
-        email = email.toLowerCase();
-
         const user: User | null = await prisma.user.findFirst({
             where: { email }
         });
