@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import { signinSchema, signupSchema } from "../schemas/auth.schema";
 import { getZodErrors } from "../utils/zod.util";
-import { createUser, verifyUser } from "../services/user.service";
+import { authenticateUser, createUser } from "../services/user.service";
 import type { ServiceResult } from "../types/service.types";
 import type { SafeUser } from "../types/user.types";
 import { createToken } from "../services/auth.service";
@@ -34,7 +34,7 @@ export const signin: RequestHandler = async (req, res): Promise<void> => {
         return;
     }
 
-    const result: ServiceResult<SafeUser> = await verifyUser(data.data);
+    const result: ServiceResult<SafeUser> = await authenticateUser(data.data);
 
     if (!result.success) {
         res.status(400).json({ error: result.error });

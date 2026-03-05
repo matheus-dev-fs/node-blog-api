@@ -1,5 +1,5 @@
 import { prisma } from "../libs/prisma.lib";
-import type { CreateUserProps, SafeUser, VerifyUserProps } from "../types/user.types";
+import type { AuthenticateUserProps, CreateUserProps, SafeUser } from "../types/user.types";
 import bcrypt from "bcryptjs";
 import type { ServiceResult } from "../types/service.types";
 import type { User } from "../generated/prisma/client";
@@ -30,7 +30,7 @@ export const createUser = async ({ name, email, password }: CreateUserProps): Pr
     }
 }
 
-export const verifyUser = async ({ email, password }: VerifyUserProps): Promise<ServiceResult<SafeUser>> => {
+export const authenticateUser = async ({ email, password }: AuthenticateUserProps): Promise<ServiceResult<SafeUser>> => {
     try {
         const user: User | null = await prisma.user.findFirst({
             where: { email }

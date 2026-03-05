@@ -6,7 +6,7 @@ export type CreateUserProps = {
     password: string;
 }
 
-export type VerifyUserProps = {
+export type AuthenticateUserProps = {
     email: string;
     password: string;
 }
