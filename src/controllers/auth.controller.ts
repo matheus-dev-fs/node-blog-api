@@ -4,6 +4,7 @@ import { getZodErrors } from "../utils/zod.util";
 import { createUser } from "../services/user.service";
 import type { ServiceResult } from "../types/service.types";
 import type { SafeUser } from "../types/user.types";
+import { createToken } from "../services/auth.service";
 
 export const signup: RequestHandler = async (req, res): Promise<void> => {
     const data = signupSchema.safeParse(req.body);
@@ -20,7 +21,7 @@ export const signup: RequestHandler = async (req, res): Promise<void> => {
         return;
     }
 
-    const token: string = '123';
+    const token: string = createToken(result.data);
 
     res.status(201).json({ user: result.data, token });
 }

@@ -7,3 +7,7 @@ export type CreateUserProps = {
 }
 
 export type SafeUser = Omit<User, 'password' | 'status'>;
+
+export type UserTokenPayload = {
+    id: number;
+}
