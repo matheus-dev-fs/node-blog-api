@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import { signupSchema } from "../schemas/auth.schema";
 import { getZodErrors } from "../utils/zod.util";
 import { createUser } from "../services/user.service";
-import type { ServiceResult } from "../types/user-service.types";
+import type { ServiceResult } from "../types/service.types";
 import type { SafeUser } from "../types/user.types";
 
 export const signup: RequestHandler = async (req, res): Promise<void> => {

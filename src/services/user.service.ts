@@ -1,7 +1,7 @@
 import { prisma } from "../libs/prisma.lib";
 import type { CreateUserProps, SafeUser } from "../types/user.types";
 import bcrypt from "bcryptjs";
-import type { ServiceResult } from "../types/user-service.types";
+import type { ServiceResult } from "../types/service.types";
 import type { User } from "../generated/prisma/client";
 
 export const createUser = async ({ name, email, password }: CreateUserProps): Promise<ServiceResult<SafeUser>> => {
