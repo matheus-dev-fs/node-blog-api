@@ -6,6 +6,11 @@ export type CreateUserProps = {
     password: string;
 }
 
+export type VerifyUserProps = {
+    email: string;
+    password: string;
+}
+
 export type SafeUser = Omit<User, 'password' | 'status'>;
 
 export type UserTokenPayload = {
