@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import express, { type Express, type Request, type Response } from 'express';
+import express, { type Express } from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { mainRoutes } from './routes/main.route';
