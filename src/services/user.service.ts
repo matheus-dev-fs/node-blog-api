@@ -1,10 +1,10 @@
 import { prisma } from "../libs/prisma.lib";
 import type { AuthenticateUserProps, CreateUserProps, SafeUser } from "../types/user.types";
 import bcrypt from "bcryptjs";
-import type { ServiceResult } from "../types/service.types";
+import type { Result } from "../types/result.types";
 import type { User } from "../generated/prisma/client";
 
-export const createUser = async ({ name, email, password }: CreateUserProps): Promise<ServiceResult<SafeUser>> => {
+export const createUser = async ({ name, email, password }: CreateUserProps): Promise<Result<SafeUser>> => {
     try {
         const user: User | null = await prisma.user.findFirst({
             where: { email }
@@ -30,7 +30,7 @@ export const createUser = async ({ name, email, password }: CreateUserProps): Pr
     }
 }
 
-export const authenticateUser = async ({ email, password }: AuthenticateUserProps): Promise<ServiceResult<SafeUser>> => {
+export const authenticateUser = async ({ email, password }: AuthenticateUserProps): Promise<Result<SafeUser>> => {
     try {
         const user: User | null = await prisma.user.findFirst({
             where: { email }
@@ -46,8 +46,26 @@ export const authenticateUser = async ({ email, password }: AuthenticateUserProp
             return { success: false, error: 'Email ou senha inválidos.' };
         }
 
-        const { password: _, status: __, ...safeUser } = user;
+        const { password: _, ...safeUser } = user;
         
+        return { success: true, data: safeUser };
+    } catch (error) {
+        return { success: false, error: 'Erro interno do servidor.' };
+    }
+}
+
+export const getUserById = async (id: number): Promise<Result<SafeUser>> => {
+    try {
+        const user: User | null = await prisma.user.findUnique({
+            where: { id }
+        });
+
+        if (!user) {
+            return { success: false, error: 'Usuário não encontrado.' };
+        }
+
+        const { password: _, ...safeUser } = user;
+
         return { success: true, data: safeUser };
     } catch (error) {
         return { success: false, error: 'Erro interno do servidor.' };
