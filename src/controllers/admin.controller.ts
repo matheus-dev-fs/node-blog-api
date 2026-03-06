@@ -6,8 +6,6 @@ import { getCoverUrl, handleFileUpload } from "../helpers/uploader.helper";
 import type { Result } from "../types/result.types";
 import { createPost, createPostSlug, findPostBySlug, updatePost } from "../services/post.service";
 import type { Post, Prisma } from "../generated/prisma/client";
-import { getUserById } from "../services/user.service";
-import type { SafeUser } from "../types/user.types";
 
 export const addPost = async (req: ExtendedRequest, res: Response): Promise<void> => {
     if (!req.user) {
@@ -55,13 +53,6 @@ export const addPost = async (req: ExtendedRequest, res: Response): Promise<void
         return;
     }
 
-    const authorResult: Result<SafeUser> = await getUserById(newPostResult.data.authorId);
-
-    if (!authorResult.success) {
-        res.status(500).json({ message: authorResult.error });
-        return;
-    }
-
     const postWithAuthor = {
         id: newPostResult.data.id,
         slug: newPostResult.data.slug,
@@ -69,7 +60,7 @@ export const addPost = async (req: ExtendedRequest, res: Response): Promise<void
         createAt: newPostResult.data.createdAt,
         cover: getCoverUrl(newPostResult.data.cover),
         tags: newPostResult.data.tags,
-        authorName: authorResult.data.name,
+        authorName: req.user.name,
     }
 
     res.status(201).json({ message: "Post criado com sucesso.", post: postWithAuthor });
@@ -110,6 +101,11 @@ export const editPost = async (req: ExtendedRequest, res: Response): Promise<voi
         return;
     }
 
+    if (post.data.authorId !== req.user.id) {
+        res.status(403).json({ message: "Você não tem permissão para editar este post." });
+        return;
+    }
+
     let coverNameResult: Result<string> | null = null;
     if (req.file) {
         coverNameResult = await handleFileUpload(req.file);
@@ -137,13 +133,6 @@ export const editPost = async (req: ExtendedRequest, res: Response): Promise<voi
         return;
     }
 
-    const authorResult: Result<SafeUser> = await getUserById(post.data.authorId);
-
-    if (!authorResult.success) {
-        res.status(500).json({ message: authorResult.error });
-        return;
-    }
-
     const postWithAuthor = {
         id: updatedPostResult.data.id,              
         status: updatedPostResult.data.status,
@@ -153,7 +142,7 @@ export const editPost = async (req: ExtendedRequest, res: Response): Promise<voi
         updated: updatedPostResult.data.updatedAt,
         cover: getCoverUrl(updatedPostResult.data.cover),
         tags: updatedPostResult.data.tags,
-        authorName: authorResult.data.name,
+        authorName: req.user.name,
     }
 
     res.status(200).json({ message: "Post atualizado com sucesso.", post: postWithAuthor });
