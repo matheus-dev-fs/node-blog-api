@@ -15,16 +15,16 @@ export const signup: RequestHandler = async (req, res): Promise<void> => {
         return;
     }
 
-    const result: Result<SafeUser> = await createUser(data.data);
+    const createUserResult: Result<SafeUser> = await createUser(data.data);
 
-    if (!result.success) {
-        res.status(400).json({ error: result.error });
+    if (!createUserResult.success) {
+        res.status(400).json({ error: createUserResult.error });
         return;
     }
 
-    const token: string = createToken(result.data);
+    const token: string = createToken(createUserResult.data);
 
-    res.status(201).json({ user: result.data, token });
+    res.status(201).json({ user: createUserResult.data, token });
 }
 
 export const signin: RequestHandler = async (req, res): Promise<void> => {
@@ -35,16 +35,16 @@ export const signin: RequestHandler = async (req, res): Promise<void> => {
         return;
     }
 
-    const result: Result<SafeUser> = await authenticateUser(data.data);
+    const authenticateUserResult: Result<SafeUser> = await authenticateUser(data.data);
 
-    if (!result.success) {
-        res.status(400).json({ error: result.error });
+    if (!authenticateUserResult.success) {
+        res.status(400).json({ error: authenticateUserResult.error });
         return;
     }
 
-    const token: string = createToken(result.data);
+    const token: string = createToken(authenticateUserResult.data);
 
-    res.status(200).json({ user: result.data, token });
+    res.status(200).json({ user: authenticateUserResult.data, token });
 }
 
 export const validate = async (req: ExtendedRequest, res: Response): Promise<void> => {
