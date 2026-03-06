@@ -51,29 +51,29 @@ export const createPostSlug = async (title: string): Promise<Result<string>> => 
 };
 
 export const createPost = async ({
-        authorId,
-        slug,
-        title,
-        tags,
-        body,
-        cover
-    }: CreatePostProps): Promise<Result<Post>> => {
-        try {
-            const post: Post = await prisma.post.create({
-                data: {
-                    authorId,
-                    slug,
-                    title,
-                    tags,
-                    body,
-                    cover
-                }
-            });
+    authorId,
+    slug,
+    title,
+    tags,
+    body,
+    cover
+}: CreatePostProps): Promise<Result<Post>> => {
+    try {
+        const post: Post = await prisma.post.create({
+            data: {
+                authorId,
+                slug,
+                title,
+                tags,
+                body,
+                cover
+            }
+        });
 
-            return { success: true, data: post };
-        } catch (error) {
-            return { success: false, error: "Erro interno no servidor." };
-        }
+        return { success: true, data: post };
+    } catch (error) {
+        return { success: false, error: "Erro interno no servidor." };
+    }
 }
 
 export const updatePost = async (slug: string, data: Prisma.PostUpdateInput): Promise<Result<Post>> => {
@@ -84,6 +84,18 @@ export const updatePost = async (slug: string, data: Prisma.PostUpdateInput): Pr
         });
 
         return { success: true, data: post };
+    } catch (error) {
+        return { success: false, error: "Erro interno no servidor." };
+    }
+}
+
+export const deletePost = async (slug: string): Promise<Result<null>> => {
+    try {
+        await prisma.post.delete({
+            where: { slug }
+        });
+
+        return { success: true, data: null };
     } catch (error) {
         return { success: false, error: "Erro interno no servidor." };
     }

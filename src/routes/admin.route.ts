@@ -9,4 +9,4 @@ adminRoutes.post('/posts', privateRoute, upload.single('cover'), adminController
 // adminRoutes.get('/posts', adminController.getPosts);
 // adminRoutes.get('/posts/:slug', adminController.getPost);
 adminRoutes.put('/posts/:slug', privateRoute, upload.single('cover'), adminController.editPost);
-// adminRoutes.delete('/posts/:slug', adminController.removePost);
+adminRoutes.delete('/posts/:slug', privateRoute, adminController.removePost);

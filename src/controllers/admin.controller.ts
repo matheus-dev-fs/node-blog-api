@@ -4,7 +4,7 @@ import { addPostSchema, editPostSchema } from "../schemas/post.schema";
 import { getZodErrors } from "../utils/zod.util";
 import { getCoverUrl, handleFileUpload } from "../helpers/uploader.helper";
 import type { Result } from "../types/result.types";
-import { createPost, createPostSlug, findPostBySlug, updatePost } from "../services/post.service";
+import { createPost, createPostSlug, deletePost, findPostBySlug, updatePost } from "../services/post.service";
 import type { Post, Prisma } from "../generated/prisma/client";
 import { getSlugFromRequest } from "../helpers/slugify.helper";
 
@@ -149,6 +149,37 @@ export const editPost = async (req: ExtendedRequest, res: Response): Promise<voi
 
 }
 
-export const removePost: RequestHandler = async (req, res): Promise<void> => {
+export const removePost = async (req: ExtendedRequest, res: Response): Promise<void> => {
+    if (!req.user) {
+        res.status(401).json({ message: "Acesso não autorizado." });
+        return;
+    }
 
+    const slugResult: Result<string> = getSlugFromRequest(req);
+
+    if (!slugResult.success) {
+        res.status(400).json({ message: slugResult.error });
+        return;
+    }
+
+    const postResult: Result<Post> = await findPostBySlug(slugResult.data);
+
+    if (!postResult.success) {
+        res.status(404).json({ message: postResult.error });
+        return;
+    }
+
+    if (postResult.data.authorId !== req.user.id) {
+        res.status(403).json({ message: "Você não tem permissão para remover este post." });
+        return;
+    }
+
+    const deleteResult: Result<null> = await deletePost(slugResult.data);
+
+    if (!deleteResult.success) {
+        res.status(500).json({ message: deleteResult.error });
+        return;
+    }
+
+    res.status(200).json({ message: "Post removido com sucesso." });
 }
