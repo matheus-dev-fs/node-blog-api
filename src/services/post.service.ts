@@ -1,7 +1,7 @@
-import type { Post } from "../generated/prisma/client";
+import type { Post, Prisma } from "../generated/prisma/client";
 import { slugify } from "../helpers/slugify.helper";
 import { prisma } from "../libs/prisma.lib";
-import type { CreatePostProps } from "../types/post.types";
+import type { CreatePostProps, EditPostProps } from "../types/post.types";
 import type { Result } from "../types/result.types";
 
 export const findPostBySlug = async (slug: string): Promise<Result<Post>> => {
@@ -74,4 +74,17 @@ export const createPost = async ({
         } catch (error) {
             return { success: false, error: "Erro interno no servidor." };
         }
+}
+
+export const updatePost = async (slug: string, data: Prisma.PostUpdateInput): Promise<Result<Post>> => {
+    try {
+        const post = await prisma.post.update({
+            where: { slug },
+            data
+        });
+
+        return { success: true, data: post };
+    } catch (error) {
+        return { success: false, error: "Erro interno no servidor." };
+    }
 }
