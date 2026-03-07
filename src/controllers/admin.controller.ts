@@ -7,8 +7,7 @@ import type { Result } from "../types/result.types";
 import { createPost, createPostSlug, deletePost, findPostBySlug, getAllPosts, updatePost } from "../services/post.service";
 import type { Post, Prisma } from "../generated/prisma/client";
 import type { PostWithAuthor } from "../types/post.types";
-import { getSlugFromRequest } from "../helpers/slugify.helper";
-import { getPageNumber } from "../helpers/request.helper";
+import { getPageNumber, getSlugFromRequest } from "../helpers/request.helper";
 
 export const getPosts = async (req: ExtendedRequest, res: Response): Promise<void> => {
     if (!req.user) {
@@ -94,7 +93,7 @@ export const addPost = async (req: ExtendedRequest, res: Response): Promise<void
         id: newPostResult.data.id,
         slug: newPostResult.data.slug,
         title: newPostResult.data.title,
-        createAt: newPostResult.data.createdAt,
+        createdAt: newPostResult.data.createdAt,
         cover: getCoverUrl(newPostResult.data.cover),
         tags: newPostResult.data.tags,
         authorName: req.user.name,

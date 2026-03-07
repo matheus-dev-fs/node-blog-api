@@ -10,3 +10,13 @@ export const getPageNumber = (request: ExtendedRequest): Result<number> => {
 
     return { success: true, data: page };
 }
+
+export const getSlugFromRequest = (req: ExtendedRequest): Result<string> => {
+    const { slug } = req.params;
+
+    if (!slug || typeof slug !== "string") {
+        return { success: false, error: "Slug inválido." };
+    }
+
+    return { success: true, data: slug };
+}
