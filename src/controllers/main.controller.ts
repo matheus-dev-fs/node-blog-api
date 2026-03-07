@@ -1,8 +1,8 @@
 import type { RequestHandler } from "express"
 import type { Result } from "../types/result.types";
-import { getPageNumber } from "../helpers/request.helper";
+import { getPageNumber, getSlugFromRequest } from "../helpers/request.helper";
 import type { PostWithAuthor } from "../types/post.types";
-import { getPublishedPosts } from "../services/post.service";
+import { getPublishedPostBySlug, getPublishedPosts } from "../services/post.service";
 import { getCoverUrl } from "../helpers/uploader.helper";
 
 export const getAllPosts: RequestHandler = async (req, res): Promise<void> => {
@@ -34,7 +34,32 @@ export const getAllPosts: RequestHandler = async (req, res): Promise<void> => {
 }
 
 export const getPost: RequestHandler = async (req, res): Promise<void> => {
+    const slugResult: Result<string> = getSlugFromRequest(req);
 
+    if (!slugResult.success) {
+        res.status(400).json({ message: slugResult.error });
+        return;
+    }
+
+    const postResult: Result<PostWithAuthor> = await getPublishedPostBySlug(slugResult.data);
+
+    if (!postResult.success) {
+        res.status(404).json({ message: postResult.error });
+        return;
+    }
+
+    const postToReturn = {
+        id: postResult.data.id,
+        title: postResult.data.title,
+        createdAt: postResult.data.createdAt,
+        cover: getCoverUrl(postResult.data.cover),
+        author: postResult.data.author?.name,
+        tags: postResult.data.tags,
+        body: postResult.data.body,
+        slug: postResult.data.slug,
+    }
+
+    res.status(200).json({ post: postToReturn });
 }
 
 export const getRelatedPosts: RequestHandler = async (req, res): Promise<void> => {

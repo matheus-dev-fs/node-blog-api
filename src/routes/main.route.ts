@@ -8,5 +8,5 @@ mainRoutes.get('/ping', (req: Request, res: Response): void => {
 });
 
 mainRoutes.get('/posts', mainController.getAllPosts);
-// mainRoutes.get('/posts/:slug', mainController.getPost);
+mainRoutes.get('/posts/:slug', mainController.getPost);
 // mainRoutes.get('/posts/:slug/related', mainController.getRelatedPosts);

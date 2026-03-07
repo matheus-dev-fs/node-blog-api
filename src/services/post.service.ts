@@ -45,7 +45,7 @@ export const getPublishedPosts = async (page: number): Promise<Result<PostWithAu
         const perPage: number = 5;
 
         const posts = await prisma.post.findMany({
-             where: {
+            where: {
                 status: "PUBLISHED"
             },
             include: {
@@ -67,6 +67,32 @@ export const getPublishedPosts = async (page: number): Promise<Result<PostWithAu
         return { success: false, error: "Erro interno no servidor." };
     }
 };
+
+export const getPublishedPostBySlug = async (slug: string): Promise<Result<PostWithAuthor>> => {
+    try {
+        const post: PostWithAuthor | null = await prisma.post.findUnique({
+            where: {
+                slug, 
+                status: "PUBLISHED" 
+            },
+            include: {
+                author: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
+        });
+
+        if (!post) {
+            return { success: false, error: "Post não encontrado." };
+        }
+
+        return { success: true, data: post };
+    } catch (error) {
+        return { success: false, error: "Erro interno no servidor." };
+    }
+}
 
 export const findPostBySlug = async (slug: string): Promise<Result<PostWithAuthor>> => {
     try {
