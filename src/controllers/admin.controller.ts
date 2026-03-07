@@ -1,4 +1,4 @@
-import type { RequestHandler, Response } from "express";
+import type { Response } from "express";
 import type { ExtendedRequest } from "../types/extended-request.types";
 import { addPostSchema, editPostSchema } from "../schemas/post.schema";
 import { getZodErrors } from "../utils/zod.util";
@@ -102,8 +102,43 @@ export const addPost = async (req: ExtendedRequest, res: Response): Promise<void
     res.status(201).json({ message: "Post criado com sucesso.", post: postWithAuthor });
 };
 
-export const getPost: RequestHandler = async (req, res): Promise<void> => {
+export const getPost = async (req: ExtendedRequest, res: Response): Promise<void> => {
+    if (!req.user) {
+        res.status(401).json({ message: "Acesso não autorizado." });
+        return;
+    }
 
+    const slugResult: Result<string> = getSlugFromRequest(req);
+
+    if (!slugResult.success) {
+        res.status(400).json({ message: slugResult.error });
+        return;
+    }
+
+    const postResult: Result<PostWithAuthor> = await findPostBySlug(slugResult.data);
+
+    if (!postResult.success) {
+        res.status(404).json({ message: postResult.error });
+        return;
+    }
+
+    if (postResult.data.authorId !== req.user.id) {
+        res.status(403).json({ message: "Você não tem permissão para acessar este post." });
+        return;
+    }
+
+    const postToReturn = {
+        id: postResult.data.id,
+        title: postResult.data.title,
+        createdAt: postResult.data.createdAt,
+        cover: getCoverUrl(postResult.data.cover),
+        author: postResult.data.author?.name,
+        tags: postResult.data.tags,
+        body: postResult.data.body,
+        slug: postResult.data.slug,
+    }
+
+    res.status(200).json({ post: postToReturn });
 }
 
 export const editPost = async (req: ExtendedRequest, res: Response): Promise<void> => {
