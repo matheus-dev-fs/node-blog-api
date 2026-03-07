@@ -72,8 +72,8 @@ export const getPublishedPostBySlug = async (slug: string): Promise<Result<PostW
     try {
         const post: PostWithAuthor | null = await prisma.post.findUnique({
             where: {
-                slug, 
-                status: "PUBLISHED" 
+                slug,
+                status: "PUBLISHED"
             },
             include: {
                 author: {
@@ -89,6 +89,54 @@ export const getPublishedPostBySlug = async (slug: string): Promise<Result<PostW
         }
 
         return { success: true, data: post };
+    } catch (error) {
+        return { success: false, error: "Erro interno no servidor." };
+    }
+}
+
+export const getPostsWithSameTags = async (slug: string): Promise<Result<PostWithAuthor[]>> => {
+    try {
+        const post = await prisma.post.findUnique({
+            where: { slug }
+        });
+
+        if (!post) {
+            return { success: false, error: "Post não encontrado." };
+        }
+
+        const postTags: string[] = post.tags.split(",");
+
+        if (postTags.length < 1) {
+            return { success: true, data: [] };
+        }
+
+        const relatedPosts = await prisma.post.findMany({
+            where: {
+                status: "PUBLISHED",
+                slug: {
+                    not: slug
+                },
+                OR: postTags.map((tag: string) => ({
+                    tags: { 
+                        contains: tag, 
+                        mode: "insensitive" 
+                    }
+                }))
+            },
+            include: {
+                author: {
+                    select: {
+                        name: true
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            take: 4
+        });
+
+        return { success: true, data: relatedPosts };
     } catch (error) {
         return { success: false, error: "Erro interno no servidor." };
     }

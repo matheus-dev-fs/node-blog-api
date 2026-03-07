@@ -2,7 +2,7 @@ import type { RequestHandler } from "express"
 import type { Result } from "../types/result.types";
 import { getPageNumber, getSlugFromRequest } from "../helpers/request.helper";
 import type { PostWithAuthor } from "../types/post.types";
-import { getPublishedPostBySlug, getPublishedPosts } from "../services/post.service";
+import { getPostsWithSameTags, getPublishedPostBySlug, getPublishedPosts } from "../services/post.service";
 import { getCoverUrl } from "../helpers/uploader.helper";
 
 export const getAllPosts: RequestHandler = async (req, res): Promise<void> => {
@@ -63,5 +63,29 @@ export const getPost: RequestHandler = async (req, res): Promise<void> => {
 }
 
 export const getRelatedPosts: RequestHandler = async (req, res): Promise<void> => {
+    const slugResult: Result<string> = getSlugFromRequest(req);
+    
+    if (!slugResult.success) {
+        res.status(400).json({ message: slugResult.error });
+        return;
+    }
 
+    const relatedPostsResult: Result<PostWithAuthor[]> = await getPostsWithSameTags(slugResult.data);
+
+    if (!relatedPostsResult.success) {
+        res.status(500).json({ message: relatedPostsResult.error });
+        return;
+    }
+
+    const postsToReturn = relatedPostsResult.data.map((post: PostWithAuthor) => ({
+        id: post.id,
+        title: post.title,
+        createdAt: post.createdAt,
+        cover: getCoverUrl(post.cover),
+        authorName: post.author?.name,
+        tags: post.tags,
+        slug: post.slug,
+    }));
+
+    res.status(200).json({ posts: postsToReturn });
 }
