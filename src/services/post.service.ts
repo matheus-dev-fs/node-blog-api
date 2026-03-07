@@ -1,12 +1,44 @@
 import type { Post, Prisma } from "../generated/prisma/client";
 import { slugify } from "../helpers/slugify.helper";
 import { prisma } from "../libs/prisma.lib";
-import type { CreatePostProps, EditPostProps } from "../types/post.types";
+import type { CreatePostProps, EditPostProps, PostWithAuthor } from "../types/post.types";
 import type { Result } from "../types/result.types";
 
-export const findPostBySlug = async (slug: string): Promise<Result<Post>> => {
+export const getAllPosts = async (page: number, authorId: number): Promise<Result<PostWithAuthor[]>> => {
     try {
-        const post: Post | null = await prisma.post.findUnique({
+        if (page < 1) {
+            return { success: false, error: "Número de página inválido." };
+        }
+
+        const perPage: number = 5;
+
+        const posts = await prisma.post.findMany({
+            where: {
+                authorId
+            },
+            include: {
+                author: {
+                    select: {
+                        name: true
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            take: perPage,
+            skip: (page - 1) * perPage
+        });
+
+        return { success: true, data: posts };
+    } catch (error) {
+        return { success: false, error: "Erro interno no servidor." };
+    }
+}
+
+export const findPostBySlug = async (slug: string): Promise<Result<PostWithAuthor>> => {
+    try {
+        const post: PostWithAuthor | null = await prisma.post.findUnique({
             where: { slug },
             include: {
                 author: {

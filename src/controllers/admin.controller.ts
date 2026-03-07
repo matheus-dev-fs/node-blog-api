@@ -4,9 +4,45 @@ import { addPostSchema, editPostSchema } from "../schemas/post.schema";
 import { getZodErrors } from "../utils/zod.util";
 import { getCoverUrl, handleFileUpload } from "../helpers/uploader.helper";
 import type { Result } from "../types/result.types";
-import { createPost, createPostSlug, deletePost, findPostBySlug, updatePost } from "../services/post.service";
+import { createPost, createPostSlug, deletePost, findPostBySlug, getAllPosts, updatePost } from "../services/post.service";
 import type { Post, Prisma } from "../generated/prisma/client";
+import type { PostWithAuthor } from "../types/post.types";
 import { getSlugFromRequest } from "../helpers/slugify.helper";
+import { getPageNumber } from "../helpers/request.helper";
+
+export const getPosts = async (req: ExtendedRequest, res: Response): Promise<void> => {
+    if (!req.user) {
+        res.status(401).json({ message: "Acesso não autorizado." });
+        return;
+    }
+
+    const pageResult: Result<number> = getPageNumber(req);
+
+    if (!pageResult.success) {
+        res.status(400).json({ message: pageResult.error });
+        return;
+    }
+
+    const postsResult: Result<PostWithAuthor[]> = await getAllPosts(pageResult.data, req.user.id);
+
+    if (!postsResult.success) {
+        res.status(500).json({ message: postsResult.error });
+        return;
+    }
+
+    const postsToReturn = postsResult.data.map((post: PostWithAuthor) => ({
+        id: post.id,
+        status: post.status,
+        title: post.title,
+        createdAt: post.createdAt,
+        cover: getCoverUrl(post.cover),
+        authorName: post.author?.name,
+        tags: post.tags,
+        slug: post.slug,
+    }));
+
+    res.status(200).json({ posts: postsToReturn });
+}
 
 export const addPost = async (req: ExtendedRequest, res: Response): Promise<void> => {
     if (!req.user) {
@@ -67,10 +103,6 @@ export const addPost = async (req: ExtendedRequest, res: Response): Promise<void
     res.status(201).json({ message: "Post criado com sucesso.", post: postWithAuthor });
 };
 
-export const getPosts: RequestHandler = async (req, res): Promise<void> => {
-
-}
-
 export const getPost: RequestHandler = async (req, res): Promise<void> => {
 
 }
@@ -95,7 +127,7 @@ export const editPost = async (req: ExtendedRequest, res: Response): Promise<voi
         return;
     }
 
-    const postResult: Result<Post> = await findPostBySlug(slugResult.data);
+    const postResult: Result<PostWithAuthor> = await findPostBySlug(slugResult.data);
 
     if (!postResult.success) {
         res.status(404).json({ message: postResult.error });
@@ -138,7 +170,7 @@ export const editPost = async (req: ExtendedRequest, res: Response): Promise<voi
         status: updatedPostResult.data.status,
         slug: updatedPostResult.data.slug,
         title: updatedPostResult.data.title,
-        createAt: updatedPostResult.data.createdAt,
+        createdt: updatedPostResult.data.createdAt,
         updated: updatedPostResult.data.updatedAt,
         cover: getCoverUrl(updatedPostResult.data.cover),
         tags: updatedPostResult.data.tags,
@@ -162,7 +194,7 @@ export const removePost = async (req: ExtendedRequest, res: Response): Promise<v
         return;
     }
 
-    const postResult: Result<Post> = await findPostBySlug(slugResult.data);
+    const postResult: Result<PostWithAuthor> = await findPostBySlug(slugResult.data);
 
     if (!postResult.success) {
         res.status(404).json({ message: postResult.error });

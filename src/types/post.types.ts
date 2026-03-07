@@ -1,3 +1,15 @@
+import type { Prisma } from "../generated/prisma/client";
+
+export type PostWithAuthor = Prisma.PostGetPayload<{
+    include: {
+        author: {
+            select: {
+                name: true
+            }
+        }
+    }
+}>;
+
 export type CreatePostProps = {
     authorId: number;
     slug: string;
