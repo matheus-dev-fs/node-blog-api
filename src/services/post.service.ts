@@ -36,6 +36,38 @@ export const getAllPosts = async (page: number, authorId: number): Promise<Resul
     }
 }
 
+export const getPublishedPosts = async (page: number): Promise<Result<PostWithAuthor[]>> => {
+    try {
+        if (page < 1) {
+            return { success: false, error: "Número de página inválido." };
+        }
+
+        const perPage: number = 5;
+
+        const posts = await prisma.post.findMany({
+             where: {
+                status: "PUBLISHED"
+            },
+            include: {
+                author: {
+                    select: {
+                        name: true
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            take: perPage,
+            skip: (page - 1) * perPage
+        });
+
+        return { success: true, data: posts };
+    } catch (error) {
+        return { success: false, error: "Erro interno no servidor." };
+    }
+};
+
 export const findPostBySlug = async (slug: string): Promise<Result<PostWithAuthor>> => {
     try {
         const post: PostWithAuthor | null = await prisma.post.findUnique({
